@@ -7,6 +7,9 @@ It runs entirely on your own computer. Labels are read by on-device OCR, so noth
 - **Check one label:** drop in an image, type the application details, press **Check label**. There are 11 built-in examples if you don't have a label handy.
 - **Check many labels:** drop in all the images plus a CSV of application data. Results stream in, problems sort to the top, and you can download a results CSV.
 
+**Live demo:** https://alcohol-label-verification.jollymushroom-04b956f3.eastus.azurecontainerapps.io
+Hosted on Azure Container Apps with 1 vCPU. It shuts down when nobody is using it, so the first visit after a quiet spell is slow while it starts up. After that, a label takes about 2.5 seconds.
+
 The take-home brief this responds to is in [BRIEF.md](BRIEF.md).
 
 ---
@@ -68,7 +71,7 @@ flowchart LR
 - **Hard photos are retried before giving up.** When an image is dim, glary or blurry, the OCR runs again after correcting the lighting and filling in glare. When almost nothing is read, it tries the image rotated. Text hidden by glare goes to **needs review** instead of failing the label.
 - **Bold type is measured.** Whether "GOVERNMENT WARNING:" is bold is estimated by comparing letter stroke thickness with the text that follows it.
 
-On a laptop, a label takes 0.3–0.6 s from upload to result.
+On a laptop, a label takes 0.3–0.6 s from upload to result. On the live demo's single cloud vCPU it takes about 2.5 s, and 4.8 s for the glare photo, which gets an extra lighting-correction pass.
 
 ---
 
@@ -76,7 +79,7 @@ On a laptop, a label takes 0.3–0.6 s from upload to result.
 
 | From the interviews | In the prototype |
 |---|---|
-| "If we can't get results back in about 5 seconds, nobody's going to use it." (Sarah) | 0.3–0.6 s per label end to end, with no network round trips. |
+| "If we can't get results back in about 5 seconds, nobody's going to use it." (Sarah) | 0.3–0.6 s per label on a laptop. On the live demo (1 cloud vCPU), every sample label finishes in under 5 s, most in about 2.5 s. |
 | "Something my mother could figure out." Half the team is over 50. | One screen per task, numbered steps, 18 px base text, 48–60 px buttons, verdicts shown with icon, word and color (never color alone), plain-English messages, a **Print these results** button, and one-click examples. |
 | Batch uploads for importers who send 200–300 labels at once. (Sarah, Janet) | **Check many labels** tab: images plus a CSV, live progress with time remaining, a Stop button, problems sorted first, filter tiles, and a results CSV download. About 3 labels a second. |
 | Firewall blocks outbound ML endpoints; the last vendor's pilot broke on it. (Marcus) | No outbound connections at all once installed. The OCR runs on the machine serving the app. |

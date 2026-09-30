@@ -63,6 +63,10 @@ class LabelOCR:
         if self._engine is None:
             from rapidocr import RapidOCR
 
+            # OpenCV otherwise sizes its thread pool to the host's cores. In a container
+            # limited to fewer CPUs, those bursts use up the CPU allowance and the whole
+            # container is paused until the next scheduling period, many times per label.
+            cv2.setNumThreads(self._threads)
             _disable_ort_memory_patterns()
             self._engine = RapidOCR(params={
                 # "error": its warnings (e.g. no text found on a blank image) mean nothing to agents.

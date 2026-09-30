@@ -160,9 +160,39 @@ The browser sends labels to `/api/verify` four at a time, so the server keeps no
 ## Sharing it with a team
 
 - **From one computer:** start it with `--host 0.0.0.0`, and others on the same network can open the address it prints. There is no sign-in, so only do this on a trusted network.
-- **On a server:** build the [`Dockerfile`](Dockerfile), or use `docker compose up -d --build`. Give it about 2 GB of RAM (OCR peaks around 1.5 GB). [`render.yaml`](render.yaml) sets it up on Render; it runs the same way on Azure Container Apps or any container host, listening on `$PORT` (default 8000) with a health check at `/api/health`.
+- **On a server:** build the [`Dockerfile`](Dockerfile), or use `docker compose up -d --build`. Give it about 2 GB of RAM (OCR peaks around 1.5 GB). It listens on `$PORT` (default 8000) with a health check at `/api/health`. [`render.yaml`](render.yaml) sets it up on Render, whose 2 GB plan is $25/month; Azure, below, is usually free at demo traffic.
 
 Set `OCR_THREADS` (default 4) to change how many CPU threads the OCR uses.
+
+### Ready-made image
+
+On every push to `main`, [a GitHub Actions workflow](.github/workflows/image.yml) runs the tests, builds the Docker image, checks it on a sample label, and publishes it as `ghcr.io/simlavelle/instructions:latest` (plus a `sha-<commit>` tag). Any container host can run that image as-is.
+
+New images on GitHub's registry start out private. Make it public once, so hosts can pull it without a password: on GitHub, open your profile's **Packages** tab, choose **instructions**, then **Package settings → Change visibility → Public**.
+
+### Free hosting on Azure Container Apps
+
+Azure's monthly free allowance (180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests) covers about 50 hours of active use at 1 vCPU and 2 GB. The app scales to zero when idle, and nothing is charged while it's at zero; the first visit after a quiet spell waits while it starts. These commands use the ready-made image, so no Azure container registry (a daily charge) is created, and container logs are turned off (log storage is billed separately).
+
+```bash
+az login
+az extension add --name containerapp --upgrade
+az provider register --namespace Microsoft.App --wait
+az group create --name label-verifier --location eastus
+az containerapp env create --name label-verifier-env --resource-group label-verifier --location eastus --logs-destination none
+az containerapp create --name label-verifier --resource-group label-verifier --environment label-verifier-env \
+  --image ghcr.io/simlavelle/instructions:latest --ingress external --target-port 8000 \
+  --cpu 1 --memory 2Gi --min-replicas 0 --max-replicas 1 --env-vars OCR_THREADS=1 \
+  --query properties.configuration.ingress.fqdn --output tsv
+```
+
+The last command prints the app's address. To roll out a newer build later, point the app at that build's tag:
+
+```bash
+az containerapp update --name label-verifier --resource-group label-verifier --image ghcr.io/simlavelle/instructions:sha-<commit>
+```
+
+To remove everything: `az group delete --name label-verifier`.
 
 ---
 
@@ -194,6 +224,7 @@ app/
     engine.py             Runs every check and produces the verdict
   static/                 UI (plain HTML/CSS/JS modules, no build step) and sample labels
 scripts/generate_samples.py   Renders the synthetic test labels
+.github/workflows/image.yml   CI: tests, builds and checks the Docker image, publishes it to ghcr.io
 tests/                    Unit, API, launcher and end-to-end sample tests
 ```
 

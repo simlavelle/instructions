@@ -1,0 +1,7 @@
+# Optional: host it for a team on Render (New > Blueprint > pick this repo).
+services:
+  - type: web
+    name: ttb-label-verifier
+    runtime: docker
+    plan: standard # 2 GB RAM; OCR needs about 1.5 GB at peak
+    healthCheckPath: /api/health

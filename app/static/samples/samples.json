@@ -1,0 +1,193 @@
+[
+  {
+    "id": "old-tom-bourbon",
+    "file": "old-tom-bourbon.png",
+    "title": "Bourbon: everything matches",
+    "description": "The example label from the brief. The application abbreviates Kentucky as KY, which is accepted.",
+    "expect": "pass",
+    "acceptable": [
+      "pass"
+    ],
+    "application": {
+      "brand_name": "OLD TOM DISTILLERY",
+      "class_type": "Kentucky Straight Bourbon Whiskey",
+      "alcohol_content": "45% Alc./Vol. (90 Proof)",
+      "net_contents": "750 mL",
+      "bottler": "Old Tom Distillery, Louisville, KY"
+    }
+  },
+  {
+    "id": "stones-throw-gin",
+    "file": "stones-throw-gin.png",
+    "title": "Gin: brand name in capitals",
+    "description": "The label says STONE'S THROW and the application says Stone's Throw. Same name, so it matches.",
+    "expect": "pass",
+    "acceptable": [
+      "pass"
+    ],
+    "application": {
+      "brand_name": "Stone's Throw",
+      "class_type": "London Dry Gin",
+      "alcohol_content": "47%",
+      "net_contents": "750 mL",
+      "bottler": "Stone's Throw Spirits Co., Portland, Oregon"
+    }
+  },
+  {
+    "id": "river-bend-vodka",
+    "file": "river-bend-vodka.png",
+    "title": "Vodka: wrong alcohol content",
+    "description": "The label says 40% (80 proof) but the application says 45% (90 proof).",
+    "expect": "fail",
+    "acceptable": [
+      "fail"
+    ],
+    "application": {
+      "brand_name": "River Bend",
+      "class_type": "Vodka",
+      "alcohol_content": "45% Alc./Vol. (90 Proof)",
+      "net_contents": "1 L",
+      "bottler": "River Bend Spirits, Austin, TX"
+    }
+  },
+  {
+    "id": "copper-kettle-rum",
+    "file": "copper-kettle-rum.png",
+    "title": "Rum: warning header in title case",
+    "description": "The warning starts “Government Warning:” instead of all capitals. Must be rejected.",
+    "expect": "fail",
+    "acceptable": [
+      "fail"
+    ],
+    "application": {
+      "brand_name": "Copper Kettle",
+      "class_type": "Spiced Rum",
+      "alcohol_content": "35% Alc./Vol. (70 Proof)",
+      "net_contents": "750 mL",
+      "bottler": "Copper Kettle Rum Co., Key West, FL"
+    }
+  },
+  {
+    "id": "harbor-light-ipa",
+    "file": "harbor-light-ipa.png",
+    "title": "Beer: warning wording changed",
+    "description": "Words are missing from the warning. Also shows 12 FL. OZ. on the label matching 355 mL in the application.",
+    "expect": "fail",
+    "acceptable": [
+      "fail"
+    ],
+    "application": {
+      "brand_name": "Harbor Light",
+      "class_type": "India Pale Ale",
+      "alcohol_content": "6.5%",
+      "net_contents": "355 mL",
+      "bottler": "Harbor Light Brewing, Portland, ME"
+    }
+  },
+  {
+    "id": "blue-ridge-rye",
+    "file": "blue-ridge-rye.png",
+    "title": "Rye: warning header not bold",
+    "description": "“GOVERNMENT WARNING:” is in regular type instead of bold. Flagged for the agent to confirm.",
+    "expect": "review",
+    "acceptable": [
+      "review"
+    ],
+    "application": {
+      "brand_name": "Blue Ridge",
+      "class_type": "Straight Rye Whiskey",
+      "alcohol_content": "50% Alc./Vol. (100 Proof)",
+      "net_contents": "750 mL",
+      "bottler": "Blue Ridge Distilling, Asheville, NC"
+    }
+  },
+  {
+    "id": "maison-leblanc-wine",
+    "file": "maison-leblanc-wine.png",
+    "title": "Imported wine: country of origin",
+    "description": "An imported French wine. Checks the importer and “Product of France”.",
+    "expect": "pass",
+    "acceptable": [
+      "pass"
+    ],
+    "application": {
+      "brand_name": "Maison Leblanc",
+      "class_type": "Côtes du Rhône Rouge",
+      "alcohol_content": "13.5%",
+      "net_contents": "750 mL",
+      "bottler": "Leblanc Imports LLC, New York, NY",
+      "country_of_origin": "France"
+    }
+  },
+  {
+    "id": "golden-fields-wheat",
+    "file": "golden-fields-wheat.png",
+    "title": "Beer: brand name one letter off",
+    "description": "The label says GOLDEN FIELD, the application says Golden Fields. Flagged as a near match for the agent.",
+    "expect": "review",
+    "acceptable": [
+      "review"
+    ],
+    "application": {
+      "brand_name": "Golden Fields",
+      "class_type": "Wheat Ale",
+      "alcohol_content": "5.2%",
+      "net_contents": "16 fl oz",
+      "bottler": "Golden Fields Brewing Co., Fargo, ND"
+    }
+  },
+  {
+    "id": "summit-tequila-no-warning",
+    "file": "summit-tequila-no-warning.png",
+    "title": "Tequila: no government warning",
+    "description": "The health warning is missing entirely.",
+    "expect": "fail",
+    "acceptable": [
+      "fail"
+    ],
+    "application": {
+      "brand_name": "Summit",
+      "class_type": "Tequila Blanco",
+      "alcohol_content": "40%",
+      "net_contents": "750 mL",
+      "bottler": "Summit Spirits Group, San Diego, CA",
+      "country_of_origin": "Mexico"
+    }
+  },
+  {
+    "id": "old-tom-bourbon-photo",
+    "file": "old-tom-bourbon-photo.jpg",
+    "title": "Photo at an angle with glare",
+    "description": "The bourbon label photographed on a bottle: tilted, with a glare streak across the name. Text hidden by glare is sent for review rather than failed.",
+    "expect": "pass",
+    "acceptable": [
+      "pass",
+      "review"
+    ],
+    "application": {
+      "brand_name": "OLD TOM DISTILLERY",
+      "class_type": "Kentucky Straight Bourbon Whiskey",
+      "alcohol_content": "45% Alc./Vol. (90 Proof)",
+      "net_contents": "750 mL",
+      "bottler": "Old Tom Distillery, Louisville, KY"
+    }
+  },
+  {
+    "id": "stones-throw-gin-dim",
+    "file": "stones-throw-gin-dim.jpg",
+    "title": "Dim, noisy photo",
+    "description": "The gin label photographed in poor light.",
+    "expect": "pass",
+    "acceptable": [
+      "pass",
+      "review"
+    ],
+    "application": {
+      "brand_name": "Stone's Throw",
+      "class_type": "London Dry Gin",
+      "alcohol_content": "47%",
+      "net_contents": "750 mL",
+      "bottler": "Stone's Throw Spirits Co., Portland, Oregon"
+    }
+  }
+]

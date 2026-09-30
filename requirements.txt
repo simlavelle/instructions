@@ -1,0 +1,13 @@
+# Runtime dependencies. Ranges rather than exact pins, so pip can pick builds
+# that exist for each OS and Python version (3.10-3.14 on Windows, macOS, Linux).
+fastapi>=0.110,<1
+uvicorn>=0.29
+python-multipart>=0.0.9
+pydantic>=2.6,<3
+pillow>=10.3
+numpy>=1.26,<3
+rapidfuzz>=3.6,<4
+# On-device OCR; the models ship inside the package. Pinned because app/ocr.py
+# relies on its default models and one of its internals.
+rapidocr==3.9.2
+onnxruntime>=1.17

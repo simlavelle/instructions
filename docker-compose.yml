@@ -1,0 +1,8 @@
+# Alternative to the start scripts for machines with Docker:  docker compose up --build
+# Then open http://localhost:8000
+services:
+  label-verifier:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000" # this computer only; use "8000:8000" to share on your network
+    restart: unless-stopped

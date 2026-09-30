@@ -1,0 +1,13 @@
+[project]
+name = "ttb-label-verifier"
+version = "1.0.0"
+description = "Checks alcohol beverage label images against COLA application data."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"

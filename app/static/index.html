@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Label Verification</title>
+  <meta name="description" content="Check alcohol beverage label artwork against COLA application data.">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap site-header__inner">
+      <svg class="site-header__mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="3"/><path d="M12 20.5l5.5 5.5L29 14.5" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <p class="site-header__title">Label Verification</p>
+        <p class="site-header__subtitle">Compliance Division &middot; Prototype</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs-bar">
+    <div class="wrap">
+      <div class="tabs" role="tablist" aria-label="What do you want to do?">
+        <button class="tab" role="tab" id="tab-single" aria-controls="panel-single" aria-selected="true">Check one label</button>
+        <button class="tab" role="tab" id="tab-batch" aria-controls="panel-batch" aria-selected="false" tabindex="-1">Check many labels</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main" class="wrap">
+    <!-- ============================== ONE LABEL ============================== -->
+    <section id="panel-single" role="tabpanel" aria-labelledby="tab-single">
+      <form id="single-form" novalidate>
+        <div class="columns">
+          <div class="card">
+            <h2 class="card__title"><span class="step" aria-hidden="true">1</span> Label image</h2>
+            <div class="dropzone" id="dropzone" data-state="empty">
+              <input type="file" id="image-input" name="image" accept="image/*" class="visually-hidden">
+              <label for="image-input" class="dropzone__empty">
+                <svg viewBox="0 0 48 48" aria-hidden="true" class="dropzone__icon"><path d="M8 34v6h32v-6M24 8v24M14 18l10-10 10 10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="dropzone__main">Drag the label image here</span>
+                <span class="dropzone__or">or</span>
+                <span class="btn btn--secondary">Choose a file</span>
+                <span class="dropzone__hint">JPG or PNG. You can also paste an image.</span>
+              </label>
+              <div class="dropzone__preview" hidden>
+                <img id="preview-img" alt="">
+                <div class="dropzone__file">
+                  <span id="preview-name"></span>
+                  <label for="image-input" class="btn btn--link">Change image</label>
+                </div>
+              </div>
+            </div>
+            <p class="field-error" id="image-error" hidden></p>
+          </div>
+
+          <div class="card">
+            <h2 class="card__title"><span class="step" aria-hidden="true">2</span> Application details</h2>
+            <p class="card__intro">Copy these from the COLA application. Only the brand name is required. Blank fields are skipped.</p>
+
+            <div class="field">
+              <label for="f-brand">Brand name <span class="req">(required)</span></label>
+              <input id="f-brand" name="brand_name" autocomplete="off" required aria-describedby="brand-error">
+              <p class="field-error" id="brand-error" hidden></p>
+            </div>
+            <div class="field">
+              <label for="f-class">Class / type</label>
+              <input id="f-class" name="class_type" autocomplete="off" placeholder="e.g. Kentucky Straight Bourbon Whiskey">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="f-abv">Alcohol content</label>
+                <input id="f-abv" name="alcohol_content" autocomplete="off" placeholder="e.g. 45% Alc./Vol.">
+              </div>
+              <div class="field">
+                <label for="f-net">Net contents</label>
+                <input id="f-net" name="net_contents" autocomplete="off" placeholder="e.g. 750 mL">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f-bottler">Bottler / producer name and address</label>
+              <input id="f-bottler" name="bottler" autocomplete="off" placeholder="e.g. Old Tom Distillery, Louisville, KY">
+            </div>
+            <div class="field field--check">
+              <input type="checkbox" id="f-imported">
+              <label for="f-imported">This is an imported product</label>
+            </div>
+            <div class="field" id="country-field" hidden>
+              <label for="f-country">Country of origin</label>
+              <input id="f-country" name="country_of_origin" autocomplete="off" placeholder="e.g. France">
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button type="submit" class="btn btn--primary btn--big" id="check-btn">Check label</button>
+          <button type="button" class="btn btn--link" id="clear-btn">Clear form</button>
+        </div>
+
+        <details class="examples" id="examples">
+          <summary>No label handy? Try an example</summary>
+          <p>Each example fills in the image and the application details for you.</p>
+          <ul class="examples__list" id="examples-list"></ul>
+        </details>
+      </form>
+
+      <div id="single-status" class="status-area" aria-live="polite"></div>
+      <div id="single-result"></div>
+    </section>
+
+    <!-- ============================== MANY LABELS ============================== -->
+    <section id="panel-batch" role="tabpanel" aria-labelledby="tab-batch" hidden>
+      <div class="columns">
+        <div class="card">
+          <h2 class="card__title"><span class="step" aria-hidden="true">1</span> Label images</h2>
+          <div class="dropzone dropzone--compact" id="batch-dropzone">
+            <input type="file" id="batch-images" accept="image/*" multiple class="visually-hidden">
+            <label for="batch-images" class="dropzone__empty">
+              <span class="dropzone__main">Drag all the label images here</span>
+              <span class="dropzone__or">or</span>
+              <span class="btn btn--secondary">Choose files</span>
+            </label>
+          </div>
+          <p class="file-summary" id="batch-images-summary">No images chosen yet.</p>
+        </div>
+        <div class="card">
+          <h2 class="card__title"><span class="step" aria-hidden="true">2</span> Application data (spreadsheet)</h2>
+          <p class="card__intro">A CSV file with one row per label. The <strong>filename</strong> column must match the image file name.</p>
+          <div class="csv-picker">
+            <input type="file" id="batch-csv" accept=".csv,text/csv" class="visually-hidden">
+            <label for="batch-csv" class="btn btn--secondary">Choose CSV file</label>
+            <a class="btn btn--link" href="/static/samples/batch-template.csv" download>Download a blank template</a>
+          </div>
+          <p class="file-summary" id="batch-csv-summary">No spreadsheet chosen yet.</p>
+          <details class="help">
+            <summary>What columns does the spreadsheet need?</summary>
+            <p><code>filename</code>, <code>brand_name</code>, <code>class_type</code>, <code>alcohol_content</code>, <code>net_contents</code>, <code>bottler</code>, <code>country_of_origin</code>. Only <code>filename</code> and <code>brand_name</code> are required. Save from Excel as &ldquo;CSV UTF-8&rdquo;.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button type="button" class="btn btn--primary btn--big" id="batch-start">Check all labels</button>
+        <button type="button" class="btn btn--link" id="batch-example">Try the example batch (11 labels)</button>
+      </div>
+      <p class="field-error" id="batch-error" role="alert" hidden></p>
+
+      <div id="batch-progress" class="progress" hidden>
+        <div class="progress__text"><span id="batch-progress-text"></span></div>
+        <div class="progress__track"><div class="progress__bar" id="batch-progress-bar"></div></div>
+        <button type="button" class="btn btn--secondary" id="batch-stop">Stop</button>
+      </div>
+
+      <section id="batch-results" hidden aria-labelledby="batch-results-title">
+        <div class="batch-head">
+          <h2 id="batch-results-title" tabindex="-1">Results</h2>
+          <div class="batch-head__actions">
+            <button type="button" class="btn btn--secondary" id="batch-download">Download results (CSV)</button>
+          </div>
+        </div>
+        <div class="summary-tiles" id="batch-tiles" role="group" aria-label="Filter results"></div>
+        <table class="results-table">
+          <thead>
+            <tr><th scope="col">Result</th><th scope="col">Label</th><th scope="col">What needs attention</th><th scope="col"><span class="visually-hidden">Details</span></th></tr>
+          </thead>
+          <tbody id="batch-rows"></tbody>
+        </table>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Labels are read on this computer. Nothing is sent over the internet and nothing is stored.</p>
+      <p class="site-footer__fine">Prototype for evaluation. Results are advice for the reviewing agent, not a decision.</p>
+    </div>
+  </footer>
+
+  <dialog id="detail-dialog" class="dialog" aria-labelledby="detail-title">
+    <div class="dialog__bar">
+      <h2 id="detail-title" class="dialog__title">Label details</h2>
+      <button type="button" class="btn btn--secondary" data-close>Close</button>
+    </div>
+    <div id="detail-body"></div>
+  </dialog>
+
+  <dialog id="zoom-dialog" class="dialog dialog--zoom" aria-label="Enlarged label image">
+    <div class="dialog__bar">
+      <p class="dialog__title" id="zoom-title">Label image</p>
+      <button type="button" class="btn btn--secondary" data-close>Close</button>
+    </div>
+    <img id="zoom-img" alt="">
+  </dialog>
+</body>
+</html>

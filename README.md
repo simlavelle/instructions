@@ -1,118 +1,215 @@
-# **Take-Home Project: AI-Powered Alcohol Label Verification App**
+# Label Verification (prototype)
 
-## **Project Background & Stakeholder Context**
+A web tool that checks alcohol beverage label artwork against the data in a COLA application: brand name, class/type, alcohol content, net contents, bottler, country of origin, and the Government Health Warning Statement. It handles one label at a time or a batch of hundreds, and gives each field a plain-English verdict.
 
-*The following document contains notes from our discovery sessions with the Compliance Division, along with technical requirements for the prototype. We've included stakeholder feedback to give you context on how this tool will be used.*
+It runs entirely on your own computer. Labels are read by on-device OCR, so nothing is sent over the internet, and there are no accounts, API keys or cloud services.
 
-### **Interview Notes: Sarah Chen, Deputy Director of Label Compliance**
+- **Check one label:** drop in an image, type the application details, press **Check label**. There are 11 built-in examples if you don't have a label handy.
+- **Check many labels:** drop in all the images plus a CSV of application data. Results stream in, problems sort to the top, and you can download a results CSV.
 
-*Conducted Tuesday, 3:15 PM — Sarah was running late from her daughter's school play rehearsal*
+The take-home brief this responds to is in [BRIEF.md](BRIEF.md).
 
-"Thanks for meeting with me. Sorry about the delay—my daughter's playing the lead in her school's production of *Annie*next week and rehearsals have been crazy. Anyway, let me tell you about what we're dealing with here.
+---
 
-So the TTB reviews about 150,000 label applications a year. Our team of 47 agents handles all of them. Back in the 80s—before my time—they actually had over 100 agents, but budget cuts, you know how it goes. We've been doing things basically the same way since the COLA system went online in 2003. That was a big upgrade from paper forms, believe it or not.
+## Run it on your computer
 
-The actual review process is pretty straightforward. An agent pulls up an application, looks at the label artwork, and checks that what's on the label matches what's in the application. Brand name matches? Check. ABV is correct? Check. Government warning is there? Check. It takes maybe 5-10 minutes per application for a simple one, longer if there are issues.
+Works on Windows, macOS and Linux.
 
-Here's the thing though—and this is what got leadership interested in AI—a lot of what we do is just... matching. Like literally just making sure the number on the form is the same as the number on the label. My agents spend half their day doing what's essentially data entry verification. It's not that they can't do more complex analysis, it's that they're drowning in routine stuff.
+**1. Install Python 3.10 or newer** (one time) from [python.org/downloads](https://www.python.org/downloads/). Version 3.12 or 3.13 is the safest choice. On Windows, tick **"Add python.exe to PATH"** in the installer.
 
-Oh, I should mention—we tried a pilot with the scanning vendor last year. Disaster. The system would take 30, 40 seconds sometimes to process a single label. Our agents just went back to doing it by eye because they could do five labels in the time it took the machine to do one. **If we can't get results back in about 5 seconds, nobody's going to use it.** We learned that the hard way.
+**2. Get the app.** On [the GitHub page](https://github.com/simlavelle/instructions), click **Code → Download ZIP** and unzip it, or run `git clone https://github.com/simlavelle/instructions.git`.
 
-What else... The agents really vary in their tech comfort level. Dave's been here since the Clinton administration and still prints his emails. Meanwhile, Jenny's fresh out of college and probably could have built this tool herself. We need something **my mother could figure out**—she's 73 and just learned to video call her grandkids last year, if that gives you a benchmark. Half our team is over 50. Clean, obvious, no hunting for buttons.
+**3. Start it** from the app folder:
 
-One more thing that came up in our last team meeting—during peak season, we get these big importers who dump 200, 300 label applications on us at once. Right now we literally have to process them one at a time. If there was some way to **handle batch uploads**, that would be huge. Janet from our Seattle office has been asking about this for years."
+| Windows | macOS | Linux (or macOS Terminal) |
+|---|---|---|
+| Double-click **`start.bat`** | Double-click **`start.command`** | Run `./start.sh` |
 
-### **Interview Notes: Marcus Williams, IT Systems Administrator**
+The first start sets up a private Python environment in a `.venv` folder inside the app folder and installs what the app needs. This takes a few minutes and needs internet access. After that, the app starts in a few seconds and works offline.
 
-*Coffee chat, Thursday morning*
+Your browser opens the app at http://127.0.0.1:8000. Keep the window that opened (a Command Prompt or Terminal) open while you use it. To stop the app, press Ctrl+C or close that window.
 
-"Sarah probably gave you the business side. Let me fill you in on some of the technical landscape.
+Options go after the command, for example `./start.sh --port 8080` or `start.bat --no-browser`:
 
-Our current infrastructure is... well, it's government infrastructure, let's leave it at that. We're on Azure now after the migration in 2019. That was a whole thing—don't get me started on the FedRAMP certification process. Took 18 months just for the paperwork.
+| Option | |
+|---|---|
+| `--port 8080` | Use a different port. If the port is taken, the next free one is used automatically. |
+| `--no-browser` | Don't open a browser window. |
+| `--host 0.0.0.0` | Let other computers on your network use it. The start message shows the address to give them. |
 
-The COLA system is built on .NET, though there's been talk about modernizing it for years. We had a contractor come in last summer to do an assessment and they quoted us $4.2 million for a full rebuild. That went nowhere, obviously.
+**Prefer Docker?** Run `docker compose up --build` and open http://localhost:8000.
 
-For this prototype, we're not looking to integrate with COLA directly—that's a whole different beast with its own authorization requirements. Think of this as a standalone proof-of-concept that could potentially inform future procurement decisions. If it works well, maybe we look at how to incorporate it into the workflow. But that's years away, realistically.
+### If something goes wrong
 
-Security-wise, we'd need to be careful with any production deployment—there's PII considerations, document retention policies, the usual federal compliance stuff. But for a prototype? Just don't do anything crazy. We're not storing anything sensitive for this exercise.
+| Problem | What to do |
+|---|---|
+| "Python 3.10 or newer is needed" | Install Python from python.org. On Windows, tick "Add python.exe to PATH". Then open a new window and try again. |
+| macOS says `start.command` can't be opened | Right-click it, choose **Open**, then **Open** again. You only have to do this once. Or run `./start.sh` in Terminal. |
+| Linux: "Couldn't create a Python environment" | Install the venv module: `sudo apt install python3-venv` |
+| Installing packages fails | Check the internet connection or proxy. On an Intel Mac, use Python 3.13: the OCR runtime has no Intel-Mac build for 3.14. |
+| You want a clean start | Delete the `.venv` folder in the app folder and start again. |
 
-Oh, and our network blocks outbound traffic to a lot of domains, so keep that in mind if you're thinking about cloud APIs. During the scanning vendor pilot, half their features didn't work because our firewall blocked connections to their ML endpoints. Classic."
+---
 
-### **Interview Notes: Dave Morrison, Senior Compliance Agent (28 years)**
+## How it works
 
-*Brief hallway conversation*
-
-"Look, I'll be honest, I've seen a lot of these 'modernization' projects come and go. Remember the automated phone system they put in back in 2008? Supposed to reduce call volume. We ended up with more calls because nobody could figure out how to navigate it.
-
-The thing about label review is there's nuance. You can't just pattern match everything. Like, I had one last week where the brand name was 'STONE'S THROW' on the label but 'Stone's Throw' in the application. Technically a mismatch? Sure. But it's obviously the same thing. You need judgment.
-
-That said, I'm not against new tools. If something can help me get through my queue faster, great. Just don't make my life harder in the process. I spend enough time fighting with COLA as it is."
-
-### **Interview Notes: Jenny Park, Junior Compliance Agent (8 months)**
-
-*Teams call, Friday afternoon*
-
-"I'm so excited you're working on this! When I started here, I was kind of shocked at how manual everything is. Like, I literally have a printed checklist on my desk that I go through for every label. Brand name—check with my eyes. ABV—check with my eyes. Warning statement—check with my eyes. It's 2024!
-
-The one thing I'd say is the warning statement check is actually trickier than it sounds. It has to be **exact**. Like, word-for-word, and the 'GOVERNMENT WARNING:' part has to be in all caps and bold. Sarah probably mentioned this but people try to get creative with the warning all the time. Smaller font, different wording, burying it in tiny text. I caught one last month where they used 'Government Warning' in title case instead of all caps. Rejected.
-
-Also—and this is maybe out of scope for a prototype—but it would be amazing if the tool could handle images that aren't perfectly shot. I've seen labels that are photographed at weird angles, or the lighting is bad, or there's glare on the bottle. Right now if an agent can't read the label they just reject it and ask for a better image. But if AI could handle some of that..."
-
-## **Technical Requirements**
-
-You are free to use any programming languages, frameworks, or libraries you prefer. We want to see what kind of engineering, design, and integration decisions you make.
-
-## **Additional Context**
-
-### **About TTB Label Requirements**
-
-For reference, TTB requires specific information on alcohol beverage labels. The exact requirements vary by beverage type (beer, wine, distilled spirits) but common elements include:
-
-- Brand name
-- Class/type designation
-- Alcohol content (with some exceptions for certain wine/beer)
-- Net contents
-- Name and address of bottler/producer
-- Country of origin for imports
-- **Government Health Warning Statement** (mandatory on all alcohol beverages)
-
-We encourage you to review TTB's guidelines at ttb.gov for additional context on label requirements.
-
-### **Sample Label**
-
-Your app should handle labels containing information like the example below:
-
-**Example Distilled Spirits Label Fields:**
-
-- Brand Name: "OLD TOM DISTILLERY"
-- Class/Type: "Kentucky Straight Bourbon Whiskey"
-- Alcohol Content: "45% Alc./Vol. (90 Proof)"
-- Net Contents: "750 mL"
-- Government Warning: \[Standard government warning text\]
-
-*We encourage you to create or source additional test labels—AI image generation tools work well for this.*
-
-## **Deliverables**
-
-1. **Source Code Repository** (GitHub or similar)
-   - All source code
-   - README with setup and run instructions
-   - Brief documentation of approach, tools used, assumptions made
-2. **Deployed Application URL**
-   - Working prototype we can access and test
-
-## **Evaluation Criteria**
-
-- Correctness and completeness of core requirements
-- Code quality and organization
-- Appropriate technical choices for the scope
-- User experience and error handling
-- Attention to requirements
-- Creative problem-solving
-
-We understand this is time-constrained. A working core application with clean code is preferred over ambitious but incomplete features. Document any trade-offs or limitations.
-
-*Questions? Reach out for clarification—though we also value how you fill in gaps independently.*
-
-Good luck!
+```mermaid
+flowchart LR
+    A[Label image] --> Q[Image checks<br/>blur, glare, size]
+    A --> O[On-device OCR<br/>RapidOCR + ONNX Runtime]
+    O --> V[Rules engine]
+    F[Application data] --> V
+    Q --> V
+    V --> R[Field-by-field verdicts<br/>pass / needs review / fail]
 ```
+
+- **OCR reads; plain rules decide; the agent has the final say.** OCR turns the image into lines of text. Every match or mismatch is decided by small, tested rules in [`app/verification/`](app/verification/) that explain themselves ("the label says 40% but the application says 45%"). The tool advises the agent and never approves or rejects on its own.
+- **Nothing leaves the computer.** The OCR models ship inside the `rapidocr` Python package. The web page loads nothing from the internet (no CDNs, no web fonts). Images are checked in memory and never saved. This also means the tool keeps working on a network that blocks outside services.
+- **Hard photos are retried before giving up.** When an image is dim, glary or blurry, the OCR runs again after correcting the lighting and filling in glare. When almost nothing is read, it tries the image rotated. Text hidden by glare goes to **needs review** instead of failing the label.
+- **Bold type is measured.** Whether "GOVERNMENT WARNING:" is bold is estimated by comparing letter stroke thickness with the text that follows it.
+
+On a laptop, a label takes 0.3–0.6 s from upload to result.
+
+---
+
+## What we heard, and what we built
+
+| From the interviews | In the prototype |
+|---|---|
+| "If we can't get results back in about 5 seconds, nobody's going to use it." (Sarah) | 0.3–0.6 s per label end to end, with no network round trips. |
+| "Something my mother could figure out." Half the team is over 50. | One screen per task, numbered steps, 18 px base text, 48–60 px buttons, verdicts shown with icon, word and color (never color alone), plain-English messages, a **Print these results** button, and one-click examples. |
+| Batch uploads for importers who send 200–300 labels at once. (Sarah, Janet) | **Check many labels** tab: images plus a CSV, live progress with time remaining, a Stop button, problems sorted first, filter tiles, and a results CSV download. About 3 labels a second. |
+| Firewall blocks outbound ML endpoints; the last vendor's pilot broke on it. (Marcus) | No outbound connections at all once installed. The OCR runs on the machine serving the app. |
+| No storage of sensitive data for the prototype. (Marcus) | Stateless: images are processed in memory and discarded. No database and no disk writes. |
+| "STONE'S THROW" vs "Stone's Throw": obviously the same, you need judgment. (Dave) | Differences in capitalization, punctuation, spacing, accents or state abbreviations count as a match, with a note saying what differs. Near-misses go to **needs review** with the differing words shown. Only real differences fail. |
+| The warning must be word for word, with "GOVERNMENT WARNING:" in all caps and bold. Title case gets rejected. (Jenny) | Three separate warning checks (capitals, exact wording, bold) and a word-level diff that strikes out missing words and underlines replacements. |
+| Photos at odd angles, bad lighting, glare. (Jenny) | Glare and blur detection, lighting correction and rotation retries, and a more forgiving review threshold for poor images. |
+
+---
+
+## Verification rules
+
+Blank application fields are skipped, not failed. Only the brand name is required.
+
+| Field | Match | Needs review | Fail |
+|---|---|---|---|
+| Brand name, class/type, bottler, country | Same text, ignoring capitalization, punctuation, spacing and accents; state names and abbreviations are treated as equal; extra words such as "Bottled by" are ignored. The brand is looked for in large type first, so the brand inside the bottler's small-print name doesn't hide a difference. | At least 85% similar (75% when the image has glare, blur or low resolution), with the differing words shown | Anything less, or not found |
+| Alcohol content | Same % ABV; proof must equal 2 × ABV if printed | Application value has no readable number | Different ABV or proof, or no statement on the label |
+| Net contents | Same volume, including equivalent units (12 FL. OZ. = 355 mL, 75 cl = 750 mL) | Application value has no readable volume | Different volume, or none on the label |
+| Government warning: capitals | "GOVERNMENT WARNING" in capitals, followed by a colon | Colon not found (OCR can miss it) | Not in capitals, or header missing |
+| Government warning: wording | Word for word with 27 CFR 16.21 (the body may be in any case) | A letter or two off in at most a couple of words (likely an OCR misread) | Any word missing, added or changed |
+| Government warning: bold | Header visibly heavier than the body | Not bold, or couldn't tell (the agent confirms by eye) | — |
+| Government warning: presence | — | — | No warning on the label |
+
+Overall verdict: any fail → **Problems found**; otherwise any review → **Needs review**; otherwise **Looks good**.
+
+---
+
+## Test labels and results
+
+[`scripts/generate_samples.py`](scripts/generate_samples.py) renders 11 synthetic labels into [`app/static/samples/`](app/static/samples/), each built to exercise one situation from the interviews. They double as the in-app examples and as the regression suite in [`tests/test_samples.py`](tests/test_samples.py).
+
+| Sample | Intended outcome | Result |
+|---|---|---|
+| Bourbon, everything matches (the brief's example; application says KY, label says Kentucky) | Looks good | Looks good |
+| Gin, STONE'S THROW vs Stone's Throw | Looks good | Looks good |
+| Vodka, label 40% (80 proof) vs application 45% (90 proof) | Problems found | Problems found |
+| Rum, "Government Warning:" in title case | Problems found | Problems found |
+| IPA, warning missing two phrases; 12 FL. OZ. vs 355 mL | Problems found (volume matches) | Problems found |
+| Rye, warning header not bold | Needs review | Needs review |
+| Imported wine, "Product of France" | Looks good | Looks good |
+| Wheat ale, GOLDEN FIELD vs Golden Fields | Needs review | Needs review |
+| Tequila, no warning at all | Problems found | Problems found |
+| Bourbon photo: tilted, curved shading, glare over the name | Looks good or Needs review | Needs review (glare hides letters) |
+| Gin photo: dim and noisy | Looks good or Needs review | Looks good |
+
+In a stress run with every sample rescaled to random sizes (0.6×–2.2×), 43 of 44 got the intended verdict. Latency was 0.28 s on average and 0.5 s at most (Intel Mac laptop, 4 OCR threads).
+
+---
+
+## API
+
+`POST /api/verify` (multipart form)
+
+| Field | |
+|---|---|
+| `image` | Label image (JPG, PNG, WebP, up to 20 MB) |
+| `application` | JSON: `brand_name` (required), `class_type`, `alcohol_content`, `net_contents`, `bottler`, `country_of_origin` |
+
+```bash
+curl -F image=@app/static/samples/river-bend-vodka.png \
+     -F 'application={"brand_name":"River Bend","alcohol_content":"45%"}' \
+     http://127.0.0.1:8000/api/verify
+```
+
+It returns the verdict, a headline, per-field checks (status, application value, label value, message, warning diff), timing, image-quality notes, and the full OCR text. Errors return `{"detail": "<message an agent can read>"}` with 400 (bad image), 413 (too large) or 422 (bad application data). `GET /api/health` returns `{"status": "ok"}`.
+
+### Batch CSV format
+
+One row per label. `filename` must match the image file name (case-insensitive). The header row accepts common variants such as `brand` or `abv`. A template is at `/static/samples/batch-template.csv`.
+
+```csv
+filename,brand_name,class_type,alcohol_content,net_contents,bottler,country_of_origin
+old-tom-bourbon.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Louisville, KY",
+```
+
+The browser sends labels to `/api/verify` four at a time, so the server keeps no state. Closing the browser tab stops the batch.
+
+---
+
+## Sharing it with a team
+
+- **From one computer:** start it with `--host 0.0.0.0`, and others on the same network can open the address it prints. There is no sign-in, so only do this on a trusted network.
+- **On a server:** build the [`Dockerfile`](Dockerfile), or use `docker compose up -d --build`. Give it about 2 GB of RAM (OCR peaks around 1.5 GB). [`render.yaml`](render.yaml) sets it up on Render; it runs the same way on Azure Container Apps or any container host, listening on `$PORT` (default 8000) with a health check at `/api/health`.
+
+Set `OCR_THREADS` (default 4) to change how many CPU threads the OCR uses.
+
+---
+
+## Development
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+pytest                             # 80 tests, about 6 seconds, no network needed
+uvicorn app.main:app --reload      # run with auto-reload
+python scripts/generate_samples.py # re-render the sample labels
+```
+
+### Project layout
+
+```
+run.py                    Launcher: sets up .venv on first run, starts the server, opens the browser
+start.bat / start.command / start.sh   Double-click or terminal wrappers that find Python and call run.py
+app/
+  main.py                 FastAPI app: /api/verify, /api/health, static UI, security headers
+  models.py               Pydantic models shared by the OCR, rules and API
+  imaging.py              Image loading, quality checks, lighting/glare correction
+  ocr.py                  On-device OCR: retries, fixed input size, bold estimate
+  verification/
+    normalize.py          Text normalization levels
+    fields.py             Brand/class/bottler/country, alcohol, net contents rules
+    warning.py            Government warning checks and word diff
+    engine.py             Runs every check and produces the verdict
+  static/                 UI (plain HTML/CSS/JS modules, no build step) and sample labels
+scripts/generate_samples.py   Renders the synthetic test labels
+tests/                    Unit, API, launcher and end-to-end sample tests
+```
+
+---
+
+## Assumptions and limitations
+
+- **Standalone prototype.** No COLA integration and no sign-in. Application data is typed in or uploaded as CSV.
+- **Scope of rules.** Covers the fields in the brief. It does not check type-size minimums (these need the physical container size), standards of fill, beverage-specific rules (for example, when wine or beer may omit alcohol content), or statements like sulfites and colour additives.
+- **OCR limits.** Heavily stylized fonts, text curved around a bottle, and very small print can be misread. When that happens the tool says what it couldn't read and asks for review instead of failing the label. Bold detection is an estimate, so a non-bold header goes to review, not fail.
+- **Sample labels are synthetic.** Before relying on accuracy figures, evaluate on a few hundred real, anonymized COLA images and tune the review thresholds against agent decisions.
+- **Batch runs in the browser.** That keeps the server stateless, but closing the tab ends the batch. A production version would use a server-side job queue with retention rules.
+
+## Next steps
+
+1. Evaluate on real COLA images and tune the review thresholds from agent feedback.
+2. Add beverage-type rules (wine, malt, spirits) and the remaining mandatory statements.
+3. Move batch processing to a server-side queue, then integrate with COLA.
+4. Let agents mark a flagged item "accepted", and feed those decisions back into threshold tuning.
